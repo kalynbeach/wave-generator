@@ -8,13 +8,14 @@ The `wave-generator` is an advanced binaural sound generator web application bui
 
 ### Core Technologies
 
+- **TypeScript**: For type safety and better developer experience
 - **Bun**: JavaScript/TypeScript runtime and package manager
 - **Next.js 15**: React framework with App Router
 - **React 19**: UI library with React Compiler
 - **Tailwind CSS v4**: Utility-first CSS framework
 - **shadcn/ui**: Reusable UI components
 - **Web Audio API**: Core API for audio processing and generation
-- **TypeScript**: For type safety and better developer experience
+- **Vitest**: Testing framework
 
 ### Application Structure
 
@@ -22,20 +23,20 @@ The `wave-generator` is an advanced binaural sound generator web application bui
 wave-generator/
 ├── app/                      # Next.js App Router
 │   ├── api/                  # API routes
-│   ├── components/           # Shared React components
-│   ├── (routes)/             # App routes
+│   ├── globals.css           # Global styles
 │   ├── layout.tsx            # Root layout
-│   └── page.tsx              # Homepage
+│   └── page.tsx              # Homepage (WaveGenerator page)
 ├── components/               # UI components
 │   ├── ui/                   # shadcn/ui components
-│   └── custom/               # Custom components
+│   ├── wave-generator.tsx    # Main WaveGenerator component
+│   └── ...                   # Other custom components
 ├── lib/                      # Shared utilities
 │   ├── audio/                # Audio generation logic
 │   ├── presets/              # Preset configurations
+│   ├── types/                # TypeScript type definitions
 │   └── utils/                # Helper functions
 ├── public/                   # Static assets
-├── styles/                   # Global styles
-├── types/                    # TypeScript type definitions
+├── tests/                    # Tests
 └── package.json              # Dependencies and scripts
 ```
 
@@ -221,9 +222,9 @@ import { Button } from "@/components/ui/button";
 import { AudioEngine } from "@/lib/audio/engine";
 
 /**
- * Main control panel for the wave generator
+ * Main WaveGenerator component
  */
-function MainControls() {
+export default function WaveGenerator() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [carrierFreq, setCarrierFreq] = useState(200);
   const [beatFreq, setBeatFreq] = useState(7.83); // Schumann resonance
@@ -325,8 +326,6 @@ function MainControls() {
     </div>
   );
 }
-
-export default MainControls;
 ```
 
 ### 3. Preset System Implementation
