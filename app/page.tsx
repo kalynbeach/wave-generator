@@ -1,4 +1,5 @@
 import WaveGenerator from "@/components/wave-generator";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function Home() {
   return (
@@ -11,12 +12,14 @@ export default function Home() {
       </header>
       
       <main className="grid place-items-center">
-        <WaveGenerator />
+        <TooltipProvider>
+          <WaveGenerator />
+        </TooltipProvider>
       </main>
       
       <footer className="mt-12 text-center text-xs text-muted-foreground">
         <p>
-          Best experienced with headphones. Binaural beats require stereo audio
+          Best experienced with headphones. Binaural sounds require stereo audio
           to be effective.
         </p>
       </footer>

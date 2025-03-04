@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
 import { AudioEngine } from "@/lib/audio/engine";
 import { ModulationSettings, NoiseType } from "@/lib/types/audio";
 import { BUILT_IN_PRESETS, PRESET_CATEGORIES, getDefaultPreset, getPresetById } from "@/lib/presets";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Waves } from "lucide-react";
+import WaveGeneratorControl from "./wave-generator-control";
 
 /**
  * Main WaveGenerator component for brainwave entrainment
@@ -135,112 +136,82 @@ export default function WaveGenerator() {
           </TabsList>
           
           <TabsContent value="frequency" className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="carrier-freq">
-                Carrier Frequency: {settings.carrierFrequency} Hz
-              </Label>
-              <Slider 
-                id="carrier-freq"
-                min={50} 
-                max={500} 
-                step={1} 
-                value={[settings.carrierFrequency]} 
-                onValueChange={(values) => handleSliderChange("carrierFrequency", values)} 
-              />
-              <div className="text-xs text-muted-foreground pl-2">
-                Using pure sine waves for optimal brainwave entrainment
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="beat-freq">
-                Beat Frequency: {settings.beatFrequency.toFixed(2)} Hz
-              </Label>
-              <Slider 
-                id="beat-freq"
-                min={0.5} 
-                max={40} 
-                step={0.1} 
-                value={[settings.beatFrequency]} 
-                onValueChange={(values) => handleSliderChange("beatFrequency", values)} 
-              />
-              <div className="text-xs text-muted-foreground pl-2">
+            <WaveGeneratorControl
+              name="Carrier Frequency"
+              value={settings.carrierFrequency}
+              onChange={(values) => handleSliderChange("carrierFrequency", values)}
+              min={50}
+              max={1000}
+              step={1}
+              unit="Hz"
+              tooltip="Primary frequency for brainwave entrainment"
+            />
+
+            <WaveGeneratorControl
+              name="Beat Frequency"
+              value={settings.beatFrequency}
+              onChange={(values) => handleSliderChange("beatFrequency", values)}
+              min={0.5}
+              max={40}
+              step={0.1}
+              unit="Hz"
+              tooltip="Frequency difference between left and right channels"
+            />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Waves className="w-5 h-5" />
+              <span className="text-sm">
                 {settings.beatFrequency <= 4 ? "Delta" : 
-                 settings.beatFrequency <= 8 ? "Theta" : 
-                 settings.beatFrequency <= 13 ? "Alpha" : 
-                 settings.beatFrequency <= 30 ? "Beta" : "Gamma"} wave range
-              </div>
+                settings.beatFrequency <= 8 ? "Theta" : 
+                settings.beatFrequency <= 13 ? "Alpha" : 
+                settings.beatFrequency <= 30 ? "Beta" : "Gamma"} wave range
+              </span>
             </div>
           </TabsContent>
           
           <TabsContent value="modulation" className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="binaural-intensity">
-                Binaural Intensity: {Math.round(settings.binauralIntensity * 100)}%
-              </Label>
-              <Slider 
-                id="binaural-intensity"
-                min={0} 
-                max={1} 
-                step={0.01} 
-                value={[settings.binauralIntensity]} 
-                onValueChange={(values) => handleSliderChange("binauralIntensity", values)} 
-              />
-              <div className="text-xs text-muted-foreground pl-2">
-                Differences in frequency between left and right ears
-              </div>
-            </div>
+            <WaveGeneratorControl
+              name="Binaural Intensity"
+              value={settings.binauralIntensity}
+              onChange={(values) => handleSliderChange("binauralIntensity", values)}
+              min={0}
+              max={1}
+              step={0.01}
+              unit="%"
+              tooltip="Differences in frequency between left and right ears"
+            />
             
-            <div className="space-y-2">
-              <Label htmlFor="amod-depth">
-                Amplitude Modulation: {Math.round(settings.aModDepth * 100)}%
-              </Label>
-              <Slider 
-                id="amod-depth"
-                min={0} 
-                max={1} 
-                step={0.01} 
-                value={[settings.aModDepth]} 
-                onValueChange={(values) => handleSliderChange("aModDepth", values)} 
-              />
-              <div className="text-xs text-muted-foreground pl-2">
-                Pulsing volume at the target frequency (isochronic tones)
-              </div>
-            </div>
+            <WaveGeneratorControl
+              name="Amplitude Modulation"
+              value={settings.aModDepth}
+              onChange={(values) => handleSliderChange("aModDepth", values)}
+              min={0}
+              max={1}
+              step={0.01}
+              unit="%"
+              tooltip="Pulsing volume at the target frequency (isochronic tones)"
+            />
             
-            <div className="space-y-2">
-              <Label htmlFor="stereo-depth">
-                Stereo Panning: {Math.round(settings.stereoDepth * 100)}%
-              </Label>
-              <Slider 
-                id="stereo-depth"
-                min={0} 
-                max={1} 
-                step={0.01} 
-                value={[settings.stereoDepth]} 
-                onValueChange={(values) => handleSliderChange("stereoDepth", values)} 
-              />
-              <div className="text-xs text-muted-foreground pl-2">
-                Panning between left and right channels
-              </div>
-            </div>
+            <WaveGeneratorControl
+              name="Stereo Panning"
+              value={settings.stereoDepth}
+              onChange={(values) => handleSliderChange("stereoDepth", values)}
+              min={0}
+              max={1}
+              step={0.01}
+              unit="%"
+              tooltip="Panning between left and right channels"
+            />
             
-            <div className="space-y-2">
-              <Label htmlFor="fmod-depth">
-                Frequency Modulation: {Math.round(settings.fModDepth * 100)}%
-              </Label>
-              <Slider 
-                id="fmod-depth"
-                min={0} 
-                max={1} 
-                step={0.01} 
-                value={[settings.fModDepth]} 
-                onValueChange={(values) => handleSliderChange("fModDepth", values)} 
-              />
-              <div className="text-xs text-muted-foreground pl-2">
-                Variations in the carrier frequency
-              </div>
-            </div>
+            <WaveGeneratorControl
+              name="Frequency Modulation"
+              value={settings.fModDepth}
+              onChange={(values) => handleSliderChange("fModDepth", values)}
+              min={0}
+              max={1}
+              step={0.01}
+              unit="%"
+              tooltip="Variations in the carrier frequency"
+            />
           </TabsContent>
           
           <TabsContent value="noise" className="space-y-4 py-4">
@@ -266,53 +237,41 @@ export default function WaveGenerator() {
             </div>
             
             {settings.noiseType !== "none" && (
-              <div className="space-y-2">
-                <Label htmlFor="noise-level">
-                  Noise Level: {Math.round(settings.noiseLevel * 100)}%
-                </Label>
-                <Slider 
-                  id="noise-level"
-                  min={0} 
-                  max={1} 
-                  step={0.01} 
-                  value={[settings.noiseLevel]} 
-                  onValueChange={(values) => handleSliderChange("noiseLevel", values)} 
-                />
-              </div>
+              <WaveGeneratorControl
+                name="Noise Level"
+                value={settings.noiseLevel}
+                onChange={(values) => handleSliderChange("noiseLevel", values)}
+                min={0}
+                max={1}
+                step={0.01}
+                unit="%"
+                tooltip="Volume level of the background noise"
+              />
             )}
           </TabsContent>
           
           <TabsContent value="output" className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="mix-level">
-                Tone/Effect Balance: {Math.round(settings.mixLevel * 100)}%
-              </Label>
-              <Slider 
-                id="mix-level"
-                min={0} 
-                max={1} 
-                step={0.01} 
-                value={[settings.mixLevel]} 
-                onValueChange={(values) => handleSliderChange("mixLevel", values)} 
-              />
-              <div className="text-xs text-muted-foreground pl-2">
-                Balance between carrier tone and modulation effects
-              </div>
-            </div>
+            <WaveGeneratorControl
+              name="Tone/Effect Balance"
+              value={settings.mixLevel}
+              onChange={(values) => handleSliderChange("mixLevel", values)}
+              min={0}
+              max={1}
+              step={0.01}
+              unit="%"
+              tooltip="Balance between carrier tone and modulation effects"
+            />
             
-            <div className="space-y-2">
-              <Label htmlFor="volume">
-                Volume: {Math.round(settings.volume * 100)}%
-              </Label>
-              <Slider 
-                id="volume"
-                min={0} 
-                max={1} 
-                step={0.01} 
-                value={[settings.volume]} 
-                onValueChange={(values) => handleSliderChange("volume", values)} 
-              />
-            </div>
+            <WaveGeneratorControl
+              name="Volume"
+              value={settings.volume}
+              onChange={(values) => handleSliderChange("volume", values)}
+              min={0}
+              max={1}
+              step={0.01}
+              unit="%"
+              tooltip="Overall output volume"
+            />
           </TabsContent>
         </Tabs>
       </CardContent>
