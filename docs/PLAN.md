@@ -98,10 +98,15 @@ Future feature to allow users to download their custom sounds as WAV files.
 
 ### Phase 2: Multiple Modulation Techniques
 
-- Enhance the audio engine to support all modulation techniques (a-mod, binaural, stereo, f-mod)
-- Implement background noise generation and mixing
+- Enhance the audio engine to support all modulation techniques:
+  - Implement amplitude modulation (a-mod) for isochronic tones
+  - Improve binaural beat generation with better intensity control
+  - Add stereo/bilateral modulation for panning between channels
+  - Implement frequency modulation (f-mod) to vary carrier frequency
+- Implement background noise generation (white, pink, brown) and mixing
 - Update the UI with sliders for all modulation parameters
 - Create a more Brainaural-like layout with grouped controls
+- Implement a basic preset system with presets for various mental states
 
 ### Phase 3: Preset System and Visualization
 
@@ -131,14 +136,20 @@ export class AudioEngine {
   private leftGain: GainNode | null = null;
   private rightGain: GainNode | null = null;
   private masterGain: GainNode | null = null;
+  
+  // Modulation nodes
+  private aModOscillator: OscillatorNode | null = null;
+  private aModGain: GainNode | null = null;
   private stereoPanner: StereoPannerNode | null = null;
-  private noiseSource: AudioBufferSourceNode | null = null;
+  private fModOscillator: OscillatorNode | null = null;
+  private noiseNode: AudioBufferSourceNode | null = null;
   private noiseGain: GainNode | null = null;
+  
   private isPlaying: boolean = false;
   
   // Modulation parameters
-  private aModDepth: number = 0.5; // 0-1
-  private binauralBeatFreq: number = 7.83; // Hz
+  private aModDepth: number = 0; // 0-1
+  private binauralIntensity: number = 1; // 0-1
   private stereoDepth: number = 0; // 0-1
   private fModDepth: number = 0; // 0-1
   private noiseLevel: number = 0; // 0-1
@@ -158,9 +169,6 @@ export class AudioEngine {
     this.leftGain = this.audioContext.createGain();
     this.rightGain = this.audioContext.createGain();
     
-    // Create stereo panner
-    this.stereoPanner = this.audioContext.createStereoPanner();
-    
     // Create noise gain
     this.noiseGain = this.audioContext.createGain();
     this.noiseGain.connect(this.masterGain);
@@ -168,11 +176,9 @@ export class AudioEngine {
 
   /**
    * Start playing with current settings
-   * @param carrierFrequency - The carrier frequency in Hz
-   * @param brainwaveFrequency - The target brainwave frequency in Hz
-   * @param volume - Master volume level from 0 to 1
+   * @param settings - The complete modulation settings object
    */
-  public play(carrierFrequency: number, brainwaveFrequency: number, volume: number): void {
+  public play(settings: ModulationSettings): void {
     if (!this.audioContext) {
       this.initialize();
     }
@@ -181,89 +187,98 @@ export class AudioEngine {
       this.stop();
     }
     
-    // Set parameters
-    this.binauralBeatFreq = brainwaveFrequency;
-    this.masterGain!.gain.value = volume;
+    // Apply settings
+    this.aModDepth = settings.aModDepth;
+    this.binauralIntensity = settings.binauralIntensity;
+    this.stereoDepth = settings.stereoDepth;
+    this.fModDepth = settings.fModDepth;
+    this.noiseLevel = settings.noiseLevel;
+    this.mixLevel = settings.mixLevel;
+    this.masterGain!.gain.value = settings.volume;
     
-    // Create and configure oscillator
-    this.oscillator = this.audioContext!.createOscillator();
-    this.oscillator.frequency.value = carrierFrequency;
-    
-    // Configure stereo output
-    const merger = this.audioContext!.createChannelMerger(2);
-    
-    // Setup channel routing
-    if (this.aModDepth > 0) {
-      // Setup amplitude modulation
-      this.setupAmplitudeModulation(brainwaveFrequency);
+    // Setup audio generation based on settings
+    if (settings.aModDepth > 0) {
+      this.setupAmplitudeModulation(settings.aModDepth, settings.beatFrequency);
     }
     
-    if (this.binauralBeatFreq > 0) {
-      // Setup binaural beats
-      this.setupBinauralBeats(carrierFrequency, brainwaveFrequency);
+    if (settings.binauralIntensity > 0) {
+      this.setupBinauralBeats(settings.carrierFrequency, settings.beatFrequency, settings.binauralIntensity);
     }
     
-    if (this.stereoDepth > 0) {
-      // Setup stereo panning modulation
-      this.setupStereoPanning(brainwaveFrequency);
+    if (settings.stereoDepth > 0) {
+      this.setupStereoPanning(settings.stereoDepth, settings.beatFrequency);
     }
     
-    if (this.fModDepth > 0) {
-      // Setup frequency modulation
-      this.setupFrequencyModulation(carrierFrequency, brainwaveFrequency);
+    if (settings.fModDepth > 0) {
+      this.setupFrequencyModulation(settings.fModDepth, settings.beatFrequency, settings.carrierFrequency);
     }
     
-    if (this.noiseLevel > 0) {
-      // Generate and play noise
-      this.generateNoise();
+    if (settings.noiseType !== "none" && settings.noiseLevel > 0) {
+      this.generateNoise(settings.noiseType, settings.noiseLevel);
     }
     
-    // Connect oscillator to proper outputs based on modulation types
-    // ... implementation details ...
-    
-    // Start oscillator
-    this.oscillator.start();
     this.isPlaying = true;
   }
   
   /**
    * Setup amplitude modulation (a-mod)
+   * @param depth - Modulation depth (0-1)
+   * @param frequency - Modulation frequency in Hz
    */
-  private setupAmplitudeModulation(frequency: number): void {
-    // Implementation for amplitude modulation
-    // Creates a gain node with periodic gain changes at the brainwave frequency
+  private setupAmplitudeModulation(depth: number, frequency: number): void {
+    // Create LFO for amplitude modulation
+    this.aModOscillator = this.audioContext!.createOscillator();
+    this.aModOscillator.frequency.value = frequency;
+    
+    // Create gain node for the modulation
+    this.aModGain = this.audioContext!.createGain();
+    
+    // Connect the LFO to the gain's gain parameter
+    this.aModOscillator.connect(this.aModGain.gain);
+    
+    // Configure the gain to oscillate around 0.5 based on depth
+    this.aModGain.gain.value = 0.5;
+    
+    // Start the oscillator
+    this.aModOscillator.start();
   }
   
   /**
    * Setup binaural beats
+   * @param carrier - Carrier frequency in Hz
+   * @param beatFreq - Beat frequency in Hz
+   * @param intensity - Intensity of the effect (0-1)
    */
-  private setupBinauralBeats(carrier: number, beatFreq: number): void {
-    // Implementation for binaural beats
-    // Creates two oscillators with frequency difference equal to beatFreq
+  private setupBinauralBeats(carrier: number, beatFreq: number, intensity: number): void {
+    // Implementation details...
   }
   
   /**
    * Setup stereo panning modulation
+   * @param depth - Depth of stereo effect (0-1)
+   * @param frequency - Panning frequency in Hz
    */
-  private setupStereoPanning(frequency: number): void {
-    // Implementation for stereo panning
-    // Creates a StereoPannerNode with values oscillating at the brainwave frequency
+  private setupStereoPanning(depth: number, frequency: number): void {
+    // Implementation details...
   }
   
   /**
-   * Setup frequency modulation
+   * Setup frequency modulation (f-mod)
+   * @param depth - Depth of frequency modulation (0-1)
+   * @param modFreq - Modulation frequency in Hz
+   * @param carrier - Carrier frequency in Hz
    */
-  private setupFrequencyModulation(carrier: number, modFreq: number): void {
-    // Implementation for frequency modulation
-    // Modulates the oscillator's frequency at the brainwave rate
+  private setupFrequencyModulation(depth: number, modFreq: number, carrier: number): void {
+    // Implementation details...
   }
   
   /**
-   * Generate noise (white, pink, or brown)
+   * Generate and play noise
+   * @param type - Type of noise (white, pink, brown)
+   * @param level - Volume level (0-1)
    */
-  private generateNoise(): void {
-    // Implementation for noise generation
-    // Creates an audio buffer with the appropriate noise spectrum
+  private generateNoise(type: NoiseType, level: number): void {
+    // Implementation details...
   }
 
   /**
@@ -272,84 +287,24 @@ export class AudioEngine {
   public stop(): void {
     if (!this.isPlaying) return;
 
+    // Stop and disconnect all nodes
     this.oscillator?.stop();
-    this.noiseSource?.stop();
+    this.aModOscillator?.stop();
+    this.noiseNode?.stop();
+    this.fModOscillator?.stop();
+    
+    // Reset node references
     this.oscillator = null;
-    this.noiseSource = null;
+    this.aModOscillator = null;
+    this.aModGain = null;
+    this.stereoPanner = null;
+    this.fModOscillator = null;
+    this.noiseNode = null;
+    
     this.isPlaying = false;
   }
 
-  /**
-   * Set amplitude modulation depth
-   */
-  public setAModDepth(depth: number): void {
-    this.aModDepth = depth;
-    // Update if playing
-  }
-  
-  /**
-   * Set binaural beat intensity
-   */
-  public setBinauralIntensity(intensity: number): void {
-    // Update binaural intensity if playing
-  }
-  
-  /**
-   * Set stereo panning depth
-   */
-  public setStereoDepth(depth: number): void {
-    this.stereoDepth = depth;
-    // Update if playing
-  }
-  
-  /**
-   * Set frequency modulation depth
-   */
-  public setFModDepth(depth: number): void {
-    this.fModDepth = depth;
-    // Update if playing
-  }
-  
-  /**
-   * Set noise level
-   */
-  public setNoiseLevel(level: number): void {
-    this.noiseLevel = level;
-    if (this.noiseGain) {
-      this.noiseGain.gain.value = level;
-    }
-  }
-  
-  /**
-   * Set mix level between carrier and effects
-   */
-  public setMixLevel(level: number): void {
-    this.mixLevel = level;
-    // Update balance between carrier and effects
-  }
-
-  /**
-   * Set master volume
-   */
-  public setVolume(volume: number): void {
-    if (this.masterGain) {
-      this.masterGain.gain.value = volume;
-    }
-  }
-
-  /**
-   * Cleanup resources when component unmounts
-   */
-  public cleanup(): void {
-    this.stop();
-    this.audioContext?.close();
-    this.audioContext = null;
-    this.masterGain = null;
-    this.leftGain = null;
-    this.rightGain = null;
-    this.stereoPanner = null;
-    this.noiseGain = null;
-  }
+  // Other methods (setters, cleanup, etc.)
 }
 ```
 
@@ -360,16 +315,17 @@ export class AudioEngine {
  * Audio settings with all modulation parameters
  */
 export interface ModulationSettings {
-  brainwaveFrequency: number;   // Target entrainment frequency (Hz)
   carrierFrequency: number;     // Base tone frequency (Hz)
-  aModDepth: number;            // Amplitude modulation (0-1)
+  beatFrequency: number;        // Target entrainment frequency (Hz)
+  waveType: WaveType;           // Oscillator wave type
+  volume: number;               // Master volume (0-1)
+  aModDepth: number;            // Amplitude modulation depth (0-1)
   binauralIntensity: number;    // Binaural beat intensity (0-1)
   stereoDepth: number;          // Stereo panning depth (0-1)
   fModDepth: number;            // Frequency modulation depth (0-1)
   noiseType: NoiseType;         // Type of background noise
   noiseLevel: number;           // Level of noise (0-1)
   mixLevel: number;             // Balance between carrier and effects (0-1)
-  volume: number;               // Master volume (0-1)
 }
 
 export type NoiseType = "white" | "pink" | "brown" | "none";
@@ -388,6 +344,61 @@ export type PresetCategory =
   | "meditation" 
   | "sleep" 
   | "custom";
+```
+
+### 3. Noise Generator Implementation
+
+```typescript
+/**
+ * Utility for generating different types of noise
+ */
+export class NoiseGenerator {
+  /**
+   * Generate white noise
+   * @param audioContext - The audio context
+   * @param duration - Duration in seconds
+   * @returns An AudioBuffer containing white noise
+   */
+  public static generateWhiteNoise(audioContext: AudioContext, duration: number = 2): AudioBuffer {
+    const sampleRate = audioContext.sampleRate;
+    const bufferSize = duration * sampleRate;
+    const buffer = audioContext.createBuffer(2, bufferSize, sampleRate);
+    
+    for (let channel = 0; channel < 2; channel++) {
+      const channelData = buffer.getChannelData(channel);
+      for (let i = 0; i < bufferSize; i++) {
+        // Random value between -1 and 1
+        channelData[i] = Math.random() * 2 - 1;
+      }
+    }
+    
+    return buffer;
+  }
+  
+  /**
+   * Generate pink noise (equal energy per octave)
+   * @param audioContext - The audio context
+   * @param duration - Duration in seconds
+   * @returns An AudioBuffer containing pink noise
+   */
+  public static generatePinkNoise(audioContext: AudioContext, duration: number = 2): AudioBuffer {
+    // Implementation for pink noise generation
+    // Uses filtering or a specific algorithm to create pink noise
+    // with -3dB/octave spectrum
+  }
+  
+  /**
+   * Generate brown noise (deeper than pink noise)
+   * @param audioContext - The audio context
+   * @param duration - Duration in seconds
+   * @returns An AudioBuffer containing brown noise
+   */
+  public static generateBrownNoise(audioContext: AudioContext, duration: number = 2): AudioBuffer {
+    // Implementation for brown noise generation
+    // Uses filtering or a specific algorithm to create brown noise
+    // with -6dB/octave spectrum
+  }
+}
 ```
 
 ## Quality Assurance
