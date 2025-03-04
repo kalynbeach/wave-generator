@@ -79,7 +79,7 @@ export default function WaveGenerator() {
   return (
     <Card className="w-full max-w-lg mx-auto">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold">Wave Generator</CardTitle>
+        <CardTitle className="text-2xl font-mono font-bold">WaveGenerator</CardTitle>
         <Button 
           variant={isPlaying ? "destructive" : "default"} 
           onClick={togglePlay}
@@ -127,10 +127,6 @@ export default function WaveGenerator() {
             value={[volume]} 
             onValueChange={handleVolumeChange} 
           />
-        </div>
-        
-        <div className="pt-4 text-center text-xs text-muted-foreground">
-          <p>Best experienced with headphones!</p>
         </div>
       </CardContent>
     </Card>
