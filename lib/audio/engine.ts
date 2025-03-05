@@ -1,5 +1,5 @@
-import { ModulationSettings, NoiseType } from "../types/audio";
-import { NoiseGenerator } from "./noise";
+import { ModulationSettings, NoiseType } from "@/lib/types/audio";
+import { NoiseGenerator } from "@/lib/audio/noise";
 
 /**
  * Core audio engine for generating binaural beats and other brainwave entrainment effects

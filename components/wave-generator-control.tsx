@@ -36,7 +36,7 @@ export default function WaveGeneratorControl({
   };
   
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Label htmlFor={id} className="font-semibold">
           {name}
