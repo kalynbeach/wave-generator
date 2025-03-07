@@ -10,13 +10,11 @@ export default function Home() {
           An advanced binaural sound generator for brainwave entrainment
         </p>
       </header>
-      
       <main className="grid place-items-center">
         <TooltipProvider>
           <WaveGenerator />
         </TooltipProvider>
       </main>
-      
       <footer className="mt-12 text-center text-xs text-muted-foreground">
         <p>
           Best experienced with headphones. Binaural sounds require stereo audio

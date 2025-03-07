@@ -1,37 +1,45 @@
 /**
  * Preset system for the wave-generator
  */
-import { ModulationSettings, Preset, PresetCategory } from "../types/audio";
+import type {
+  ModulationSettings,
+  Preset,
+  PresetCategory,
+} from "@/lib/types/audio";
 
 /**
  * Preset categories with descriptions
  */
-export const PRESET_CATEGORIES: { id: PresetCategory; name: string; description: string }[] = [
-  { 
-    id: "relaxation", 
-    name: "Relaxation", 
-    description: "For calm and relaxation" 
+export const PRESET_CATEGORIES: {
+  id: PresetCategory;
+  name: string;
+  description: string;
+}[] = [
+  {
+    id: "relaxation",
+    name: "Relaxation",
+    description: "For calm and relaxation",
   },
-  { 
-    id: "focus", 
-    name: "Focus", 
-    description: "For concentration and productivity" 
+  {
+    id: "focus",
+    name: "Focus",
+    description: "For concentration and productivity",
   },
-  { 
-    id: "meditation", 
-    name: "Meditation", 
-    description: "For deeper meditative states" 
+  {
+    id: "meditation",
+    name: "Meditation",
+    description: "For deeper meditative states",
   },
-  { 
-    id: "sleep", 
-    name: "Sleep", 
-    description: "For better sleep and insomnia relief" 
+  {
+    id: "sleep",
+    name: "Sleep",
+    description: "For better sleep and insomnia relief",
   },
-  { 
-    id: "custom", 
-    name: "Custom", 
-    description: "Your saved presets" 
-  }
+  {
+    id: "custom",
+    name: "Custom",
+    description: "Your saved presets",
+  },
 ];
 
 /**
@@ -54,8 +62,8 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0,
       noiseType: "brown",
       noiseLevel: 0.2,
-      mixLevel: 0.7
-    }
+      mixLevel: 0.7,
+    },
   },
   {
     id: "healing-delta",
@@ -72,10 +80,10 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0.1,
       noiseType: "brown",
       noiseLevel: 0.15,
-      mixLevel: 0.7
-    }
+      mixLevel: 0.7,
+    },
   },
-  
+
   // Theta wave presets (4-8 Hz) - meditation, creativity
   {
     id: "deep-meditation",
@@ -92,8 +100,8 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0.1,
       noiseType: "pink",
       noiseLevel: 0.1,
-      mixLevel: 0.8
-    }
+      mixLevel: 0.8,
+    },
   },
   {
     id: "creativity-boost",
@@ -110,8 +118,8 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0.1,
       noiseType: "brown",
       noiseLevel: 0.05,
-      mixLevel: 0.8
-    }
+      mixLevel: 0.8,
+    },
   },
   {
     id: "schumann-resonance",
@@ -128,10 +136,10 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0.1,
       noiseType: "none",
       noiseLevel: 0,
-      mixLevel: 1.0
-    }
+      mixLevel: 1.0,
+    },
   },
-  
+
   // Alpha wave presets (8-13 Hz) - relaxation, calmness
   {
     id: "relaxed-alpha",
@@ -148,8 +156,8 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0.1,
       noiseType: "pink",
       noiseLevel: 0.1,
-      mixLevel: 0.8
-    }
+      mixLevel: 0.8,
+    },
   },
   {
     id: "stress-relief",
@@ -166,10 +174,10 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0.1,
       noiseType: "pink",
       noiseLevel: 0.15,
-      mixLevel: 0.7
-    }
+      mixLevel: 0.7,
+    },
   },
-  
+
   // Beta wave presets (13-30 Hz) - focus, alertness
   {
     id: "focus-beta",
@@ -186,8 +194,8 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0.2,
       noiseType: "white",
       noiseLevel: 0.05,
-      mixLevel: 0.9
-    }
+      mixLevel: 0.9,
+    },
   },
   {
     id: "high-alertness",
@@ -204,9 +212,9 @@ export const BUILT_IN_PRESETS: Preset[] = [
       fModDepth: 0.3,
       noiseType: "white",
       noiseLevel: 0.05,
-      mixLevel: 0.9
-    }
-  }
+      mixLevel: 0.9,
+    },
+  },
 ];
 
 /**
@@ -215,7 +223,7 @@ export const BUILT_IN_PRESETS: Preset[] = [
  * @returns The preset or undefined if not found
  */
 export function getPresetById(id: string): Preset | undefined {
-  return BUILT_IN_PRESETS.find(preset => preset.id === id);
+  return BUILT_IN_PRESETS.find((preset) => preset.id === id);
 }
 
 /**
@@ -224,7 +232,7 @@ export function getPresetById(id: string): Preset | undefined {
  * @returns An array of presets in the category
  */
 export function getPresetsByCategory(category: PresetCategory): Preset[] {
-  return BUILT_IN_PRESETS.filter(preset => preset.category === category);
+  return BUILT_IN_PRESETS.filter((preset) => preset.category === category);
 }
 
 /**
@@ -242,6 +250,6 @@ export function getDefaultPreset(): ModulationSettings {
     fModDepth: 0,
     noiseType: "none",
     noiseLevel: 0,
-    mixLevel: 1.0
+    mixLevel: 1.0,
   };
-} 
+}

@@ -1,10 +1,14 @@
 "use client";
 
+import { Info } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type WaveGeneratorControlProps = {
   name: string;
@@ -17,15 +21,15 @@ type WaveGeneratorControlProps = {
   tooltip?: string;
 };
 
-export default function WaveGeneratorControl({ 
-  name, 
-  value, 
-  onChange, 
-  min = 0, 
-  max = 100, 
+export default function WaveGeneratorControl({
+  name,
+  value,
+  onChange,
+  min = 0,
+  max = 100,
   step = 1,
   unit = "",
-  tooltip = ""
+  tooltip = "",
 }: WaveGeneratorControlProps) {
   const id = name.toLowerCase().replace(/\s+/g, "-");
   const isPercentage = unit === "%";
@@ -34,7 +38,7 @@ export default function WaveGeneratorControl({
     const newValue = Number(e.target.value);
     onChange([isPercentage ? newValue / 100 : newValue]);
   };
-  
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
@@ -63,13 +67,13 @@ export default function WaveGeneratorControl({
         />
         {unit && <span className="text-sm font-semibold">{unit}</span>}
       </div>
-      <Slider 
+      <Slider
         id={`${id}-slider`}
-        min={min} 
-        max={max} 
-        step={step} 
-        value={[value]} 
-        onValueChange={onChange} 
+        min={min}
+        max={max}
+        step={step}
+        value={[value]}
+        onValueChange={onChange}
       />
     </div>
   );
