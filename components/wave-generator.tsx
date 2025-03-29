@@ -112,7 +112,7 @@ export default function WaveGenerator() {
           <CardTitle className="text-2xl font-mono font-bold">
             WaveGenerator
           </CardTitle>
-          <CardDescription>Advanced Brainwave Entrainment Tool</CardDescription>
+          <CardDescription></CardDescription>
         </div>
         <Button
           variant={isPlaying ? "destructive" : "default"}

@@ -241,7 +241,7 @@ export function getPresetsByCategory(category: PresetCategory): Preset[] {
  */
 export function getDefaultPreset(): ModulationSettings {
   return {
-    carrierFrequency: 200,
+    carrierFrequency: 528,
     beatFrequency: 7.83, // Schumann resonance
     volume: 0.5,
     aModDepth: 0,

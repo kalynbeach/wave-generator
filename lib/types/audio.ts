@@ -39,3 +39,14 @@ export interface ExtendedAudioSettings extends AudioSettings {
   noiseLevel: number;
   noiseType: NoiseType;
 }
+
+export type SolfeggioFrequency =
+  | 174
+  | 285
+  | 396
+  | 417
+  | 528
+  | 639
+  | 741
+  | 852
+  | 963;
